@@ -48,6 +48,7 @@ class HadoopDockerManager:
         master = self.__create_namenode(name_cluste)
         nodes = [master] + workers
         for netholder in nodes:
+            self.configure_ssh(master, netholder)
             self.configure_container(netholder.get_container())
 
         return name_cluste
@@ -83,6 +84,7 @@ class HadoopDockerManager:
             container = self.__client.containers.run(self.__datanode_img, detach=True,
                                                      network=self.__network_name,
                                                      name=name,
+                                                     privileged=True,
                                                      hostname=name,
                                                      labels={"cluster": name_cluster})
             holder = ContainerNetworkHolder(container, name,
@@ -97,9 +99,11 @@ class HadoopDockerManager:
                                                  network=self.__network_name,
                                                  name=name,
                                                  hostname=name,
+                                                 privileged=True,
                                                  labels={"cluster": name_cluster})
         holder = ContainerNetworkHolder(container, name,
                                         self.get_network_info(container.id)[self.__network_name]["IPAddress"])
+        container.exec_run(cmd=f"bash rm -f /run/nologin")
         self.__network_nodes += str(holder)
         return holder
 
@@ -108,6 +112,13 @@ class HadoopDockerManager:
             nodes_list = self.__network_nodes
         container.exec_run(cmd=f"bash -c \"echo -e '{nodes_list}' >> /etc/hosts\"")
         container.exec_run(cmd=f"bash -c \"echo -e '{nodes_list}' > /opt/hadoop/etc/hadoop/workers\"")
+
+    def configure_ssh(self, namenode, datanode):
+        datanode.get_container().exec_run(
+            cmd=f"bash rm -f /run/nologin")
+        namenode.get_container().exec_run(
+            cmd=f"bash sshpass -p \"hadoop\" ssh-copy-id -o StrictHostKeyChecking=no -f -i /home/hadoop/.ssh/hdp.pub hadoop@{datanode.get_name()}",
+            user="hadoop")
 
     def __generate_tag(self, star_with="C"):
         return f"{star_with + str(int(random() * 100000))}"
@@ -121,5 +132,5 @@ if __name__ == '__main__':
     manager = HadoopDockerManager()
     nm_cluster = manager.create_cluster()
     print(f"cluster {nm_cluster} criado com sucesso!")
-    #print(manager.delete_cluster("C468"))
+    # print(manager.delete_cluster("C468"))
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
