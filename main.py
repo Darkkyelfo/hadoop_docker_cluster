@@ -115,9 +115,9 @@ class HadoopDockerManager:
 
     def configure_ssh(self, namenode, datanode):
         datanode.get_container().exec_run(
-            cmd=f"bash rm -f /run/nologin")
+            cmd=f"bash -c \"rm -f /run/nologin\"")
         namenode.get_container().exec_run(
-            cmd=f"bash sshpass -p \"hadoop\" ssh-copy-id -o StrictHostKeyChecking=no -f -i /home/hadoop/.ssh/hdp.pub hadoop@{datanode.get_name()}",
+            cmd=f"bash -c \"sshpass -p \"hadoop\" ssh-copy-id -o StrictHostKeyChecking=no -f -i /home/hadoop/.ssh/hdp.pub hadoop@{datanode.get_name()}\"",
             user="hadoop")
 
     def __generate_tag(self, star_with="C"):
@@ -132,5 +132,3 @@ if __name__ == '__main__':
     manager = HadoopDockerManager()
     nm_cluster = manager.create_cluster()
     print(f"cluster {nm_cluster} criado com sucesso!")
-    # print(manager.delete_cluster("C468"))
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
