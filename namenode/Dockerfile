@@ -34,11 +34,11 @@ RUN yum install net-tools -y \
 && yes | cp -rf /opt/hadoop/share/hadoop/common/*.jar /opt/flume/lib && yes | cp -rf /opt/hadoop/share/hadoop/common/lib/*.jar /opt/flume/lib \
 && yes | cp -rf /opt/hadoop/share/hadoop/hdfs/*.jar /opt/flume/lib \
 && chown -R hadoop:hadoop hadoop && chown -R hadoop:hadoop flume  && chown -R hadoop:hadoop sqoop && chown -R hadoop:hadoop /home/hadoop/ \
-&& echo -e "export JAVA_HOME=/opt/jdk\nexport JRE_HOME=/opt/jdk/jre\nexport HADOOP_HOME=/opt/hadoop" >> /etc/profile \
-&& echo -e "export PATH=$PATH:$JAVA_HOME/bin:$JRE_HOME/bin:$HADOOP_HOME/bin" >> /etc/profile \
-&& echo -e "#HIVE\nexport HIVE_HOME=/opt/hive\nexport PATH=$PATH:/opt/hive/bin" >> /etc/profile \
-&& echo -e "#FLUME\nexport FLUME_HOME=/opt/flume\nexport PATH=$PATH:$FLUME_HOME/bin" >> /etc/profile \
+&& echo -e "export JAVA_HOME=/opt/jdk\nexport JRE_HOME=/opt/jdk/jre\nexport HADOOP_HOME=/opt/hadoop" >> /etc/bashrc \
+&& echo -e 'export PATH=$PATH:$JAVA_HOME/bin:$JRE_HOME/bin:$HADOOP_HOME/bin' >> /etc/bashrc \
+&& echo -e 'export HIVE_HOME=/opt/hive\nexport PATH=$PATH:/opt/hive/bin' >> /etc/bashrc\
+&& echo -e 'export FLUME_HOME=/opt/flume\nexport PATH=$PATH:$FLUME_HOME/bin' >> /etc/bashrc \
 && rm -f /run/nologin \
-&& source /etc/profile
+&& source /etc/bashrc
 VOLUME [ "/sys/fs/cgroup" ]
 CMD ["/usr/sbin/init"]
