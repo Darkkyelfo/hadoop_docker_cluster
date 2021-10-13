@@ -5,7 +5,7 @@
 
 import docker
 from string import ascii_uppercase
-from random import random, choice
+from random import randint, choice
 
 
 class ContainerNetworkHolder:
@@ -34,7 +34,8 @@ class HadoopDockerManager:
                  datanode_img="hdpdatanode"):
         self.__n_nodes = n_nodes
         self.__qt_memory = qt_memory
-        self.__network_nodes = ""
+        self.__str_workers = ""
+        self.__str_master = ""
         # docker_images
         self.__namenode_img = namenode_img
         self.__datanode_img = datanode_img
@@ -42,7 +43,7 @@ class HadoopDockerManager:
         self.__client = docker.from_env()
 
     def create_cluster(self, build_dockerfile=True):
-        name_cluste = self.__generate_tag(choice(ascii_uppercase))
+        name_cluste = self.__generate_tag()
         self.__create_network(name_cluste)
         workers = self.__create_datanode(name_cluste)
         master = self.__create_namenode(name_cluste)
@@ -70,12 +71,21 @@ class HadoopDockerManager:
         network = self.__client.networks.prune(filters=search_filter)
         return deleted_containers, network
 
+    def delete_all_clusters(self):
+        search_filter = {"label": "type=hdp_cluster"}
+        containers = self.__client.containers.list(filters=search_filter)
+        for container in containers:
+            container.stop()
+        deleted_containers = self.__client.containers.prune(filters=search_filter)
+        network = self.__client.networks.prune(filters=search_filter)
+        return deleted_containers, network
+
     def __build_docker_file(self):
         pass
 
     def __create_network(self, name_cluster):
         self.__network_name = f"hdpnet_{name_cluster}"
-        self.__client.networks.create(name=self.__network_name, labels={"cluster": name_cluster})
+        self.__client.networks.create(name=self.__network_name, labels={"cluster": name_cluster, "type": "hdp_cluster"})
 
     def __create_datanode(self, name_cluster):
         list_nodes = []
@@ -86,10 +96,10 @@ class HadoopDockerManager:
                                                      name=name,
                                                      privileged=True,
                                                      hostname=name,
-                                                     labels={"cluster": name_cluster})
+                                                     labels={"cluster": name_cluster, "type": "hdp_cluster"})
             holder = ContainerNetworkHolder(container, name,
                                             self.get_network_info(container.id)[self.__network_name]["IPAddress"])
-            self.__network_nodes += str(holder)
+            self.__str_workers += str(holder)
             list_nodes.append(holder)
         return list_nodes
 
@@ -100,18 +110,18 @@ class HadoopDockerManager:
                                                  name=name,
                                                  hostname=name,
                                                  privileged=True,
-                                                 labels={"cluster": name_cluster})
+                                                 labels={"cluster": name_cluster, "type": "hdp_cluster"})
         holder = ContainerNetworkHolder(container, name,
                                         self.get_network_info(container.id)[self.__network_name]["IPAddress"])
         container.exec_run(cmd=f"bash rm -f /run/nologin")
-        self.__network_nodes += str(holder)
+        self.__str_master += str(holder) + f"{holder.get_ip()}\thdpmaster"
         return holder
 
     def configure_container(self, container, nodes_list=None):
         if nodes_list is None:
-            nodes_list = self.__network_nodes
+            nodes_list = self.__str_master + "\n" + self.__str_workers
         container.exec_run(cmd=f"bash -c \"echo -e '{nodes_list}' >> /etc/hosts\"")
-        container.exec_run(cmd=f"bash -c \"echo -e '{nodes_list}' > /opt/hadoop/etc/hadoop/workers\"")
+        container.exec_run(cmd=f"bash -c \"echo -e '{self.__str_workers}' > /opt/hadoop/etc/hadoop/workers\"")
 
     def configure_ssh(self, namenode, datanode):
         datanode.get_container().exec_run(
@@ -120,8 +130,10 @@ class HadoopDockerManager:
             cmd=f"bash -c \"sshpass -p \"hadoop\" ssh-copy-id -o StrictHostKeyChecking=no -f -i /home/hadoop/.ssh/hdp.pub hadoop@{datanode.get_name()}\"",
             user="hadoop")
 
-    def __generate_tag(self, star_with="C"):
-        return f"{star_with + str(int(random() * 100000))}"
+    def __generate_tag(self, star_with=None):
+        if star_with is None:
+            star_with = choice(ascii_uppercase)
+        return f"{star_with + str(randint(100, 9999))}"
 
     def get_network_info(self, id):
         return self.__client.containers.get(id).attrs["NetworkSettings"]["Networks"]
@@ -130,5 +142,6 @@ class HadoopDockerManager:
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     manager = HadoopDockerManager()
+    manager.delete_all_clusters()
     nm_cluster = manager.create_cluster()
     print(f"cluster {nm_cluster} criado com sucesso!")
