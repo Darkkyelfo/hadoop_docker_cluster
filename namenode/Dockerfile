@@ -33,6 +33,7 @@ RUN yum install net-tools -y \
 && mv conf/* hadoop/etc/hadoop/ && mv apache-hive-3.1.2-bin/ hive && mv apache-flume-1.9.0-bin flume \
 && yes | cp -rf /opt/hadoop/share/hadoop/common/*.jar /opt/flume/lib && yes | cp -rf /opt/hadoop/share/hadoop/common/lib/*.jar /opt/flume/lib \
 && yes | cp -rf /opt/hadoop/share/hadoop/hdfs/*.jar /opt/flume/lib \
+&& mkdir /opt/hadoop/dfs && mkdir /opt/hadoop/dfs/data && mkdir /opt/hadoop/dfs/namespace_logs \
 && chown -R hadoop:hadoop hadoop && chown -R hadoop:hadoop flume  && chown -R hadoop:hadoop sqoop && chown -R hadoop:hadoop /home/hadoop/ \
 && echo -e "export JAVA_HOME=/opt/jdk\nexport JRE_HOME=/opt/jdk/jre\nexport HADOOP_HOME=/opt/hadoop" >> /etc/bashrc \
 && echo -e 'export PATH=$PATH:$JAVA_HOME/bin:$JRE_HOME/bin:$HADOOP_HOME/bin' >> /etc/bashrc \

@@ -51,7 +51,11 @@ class HadoopDockerManager:
         for netholder in nodes:
             self.configure_ssh(master, netholder)
             self.configure_container(netholder.get_container())
-
+        # add ssh to master
+        master.get_container().exec_run(
+            cmd=f"bash -c \"sshpass -p \"hadoop\" ssh-copy-id -o StrictHostKeyChecking=no -f -i /home/hadoop/.ssh/hdp.pub hadoop@hdpmaster\"",
+            user="hadoop")
+        self.__inicialize_cluster(master)
         return name_cluste
 
     def start_cluster(self):
@@ -115,13 +119,14 @@ class HadoopDockerManager:
                                         self.get_network_info(container.id)[self.__network_name]["IPAddress"])
         container.exec_run(cmd=f"bash rm -f /run/nologin")
         self.__str_master += str(holder) + f"{holder.get_ip()}\thdpmaster"
+        self.configure_ssh(holder, holder)
         return holder
 
     def configure_container(self, container, nodes_list=None):
         if nodes_list is None:
-            nodes_list = self.__str_master + "\n" + self.__str_workers
+            nodes_list = self.__str_master + "\n" + self.get_workers()
         container.exec_run(cmd=f"bash -c \"echo -e '{nodes_list}' >> /etc/hosts\"")
-        container.exec_run(cmd=f"bash -c \"echo -e '{self.__str_workers}' > /opt/hadoop/etc/hadoop/workers\"")
+        container.exec_run(cmd=f"bash -c \"echo -e '{self.get_workers()}' > /opt/hadoop/etc/hadoop/workers\"")
 
     def configure_ssh(self, namenode, datanode):
         datanode.get_container().exec_run(
@@ -137,6 +142,17 @@ class HadoopDockerManager:
 
     def get_network_info(self, id):
         return self.__client.containers.get(id).attrs["NetworkSettings"]["Networks"]
+
+    def __inicialize_cluster(self, namenode: ContainerNetworkHolder):
+        cat = namenode.get_container().exec_run(
+            cmd=f"bash -c \"/opt/hadoop/bin/hdfs namenode -format\"", user="hadoop")
+        print(cat)
+        cat = namenode.get_container().exec_run(
+            cmd=f"bash -c \"/opt/hadoop/sbin/start-dfs.sh\"", user="hadoop")
+        print(cat)
+
+    def get_workers(self):
+        return self.__str_workers[:-1]
 
 
 # Press the green button in the gutter to run the script.

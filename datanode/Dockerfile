@@ -21,9 +21,11 @@ RUN yum install net-tools -y \
 && wget https://hpdinstalldocker.s3.amazonaws.com/hadoop/hadoop-3.3.1.tar.gz \
 && tar -xvf jdk-8u202-linux-x64.tar.gz && rm -rf jdk-8u202-linux-x64.tar.gz && mv jdk1.8.0_202/ jdk \
 && tar -xvf hadoop-3.3.1.tar.gz && rm -rf hadoop-3.3.1.tar.gz && mv hadoop-3.3.1/ hadoop \
+&& mkdir /opt/hadoop/dfs && mkdir /opt/hadoop/dfs/data && mkdir /opt/hadoop/dfs/namespace_logs \
 && mv conf/* hadoop/etc/hadoop/ \
-&& echo -e "export JAVA_HOME=/opt/jdk\nexport JRE_HOME=/opt/jdk/jre\nexport HADOOP_HOME=/opt/hadoop" >> /etc/profile \
-&& echo -e "export PATH=$PATH:$JAVA_HOME/bin:$JRE_HOME/bin:$HADOOP_HOME/bin" >> /etc/profile \
-&& source /etc/profile && rm -f /run/nologin
+&& chown -R hadoop:hadoop /opt/hadoop && chown -R hadoop:hadoop /home/hadoop/ \
+&& echo -e "export JAVA_HOME=/opt/jdk\nexport JRE_HOME=/opt/jdk/jre\nexport HADOOP_HOME=/opt/hadoop" >> /etc/bashrc \
+&& echo -e 'export PATH=$PATH:$JAVA_HOME/bin:$JRE_HOME/bin:$HADOOP_HOME/bin' >> /etc/bashrc \
+&& source /etc/bashrc && rm -f /run/nologin
 VOLUME [ "/sys/fs/cgroup" ]
 CMD ["/usr/sbin/init"]
