@@ -1,0 +1,21 @@
+Projeto para levantar um cluster hadoop, para fins educativos, utilizando containers docker através de uma interface python.
+
+Requisitos:
+1) Docker instalado
+2) python 3.6 ou superior
+
+Como funciona:
+
+1) Na pasta do projeto execute: pip install -r requirements para instalar as dependências.
+2) Execute o arquivo "main" para levantar um cluster com 3 máquinas: 1 namenode(master) e 2 datanodes(workers).
+3) Aguarde o script executar e gerar uma mensagem como a seguinte:
+-----CLUSTER  K930----------
+172.24.0.4	hdp_K930_master
+172.24.0.4	hdpmaster
+172.24.0.2	hdp_K930_worker_0
+172.24.0.3	hdp_K930_worker_1
+para acessar o namenode abra o terminal e utilize o commando: docker exec -u hadoop -it hdp_K930_master  /bin/bash
+4) Use o comando no terminal: docker exec -u hadoop -it hdp_<CODIGO_CLUSTER>_master /bin/bash para acessar o container mestre e executar ações do hadoop
+5) Também possivel acessar a página web do hadoop com seguinte url: http://<IP_DATANODE>:9870/explorer.html#/
+
+OBS: 172.24.0.4 é o IP_DATANODE e K930 é CODIGO_CLUSTER nesse exemplo
