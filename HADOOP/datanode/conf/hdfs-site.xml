@@ -18,19 +18,19 @@
 
 <configuration>
     <property>
-      <name>dfs.replication</name>
-      <value>3</value>
+        <name>dfs.replication</name>
+        <value>3</value>
     </property>
     <property>
-      <name>dfs.namenode.name.dir</name>
-      <value>/opt/hadoop/dfs/namespace_logs</value>
+        <name>dfs.namenode.name.dir</name>
+        <value>/opt/hadoop/dfs/namespace_logs</value>
     </property>
     <property>
-      <name>dfs.datanode.data.dir</name>
-      <value>/opt/hadoop/dfs/data</value>
+        <name>dfs.datanode.data.dir</name>
+        <value>/opt/hadoop/dfs/data</value>
     </property>
-    <property>           
-      <name>dfs.webhdfs.enabled</name>           
-      <value>true</value>        
+    <property>
+        <name>dfs.webhdfs.enabled</name>
+        <value>true</value>
     </property>
 </configuration>

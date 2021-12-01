@@ -8,6 +8,6 @@ from pyherdoop import HDCManager
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     manager = HDCManager()
-    # manager.delete_all_clusters()
-    cluster_hdp = manager.create_cluster()
+    manager.delete_all_clusters()
+    cluster_hdp = manager.create_cluster(qt_nodes=3,qt_name_node=1, ambari=False, force_build=True)
     print(f"{cluster_hdp}")

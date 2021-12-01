@@ -1,6 +1,6 @@
 FROM centos:7
 WORKDIR /opt
-COPY conf/ /opt/conf
+COPY conf /opt/conf
 #EXPOSE 22
 RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
 systemd-tmpfiles-setup.service ] || rm -f $i; done); \
@@ -25,8 +25,11 @@ RUN yum install net-tools -y \
 && wget https://hpdinstalldocker.s3.amazonaws.com/hadoop/hadoop-3.3.1.tar.gz \
 && wget --no-check-certificate https://httpd-mirror.sergal.org/apache/hive/hive-3.1.2/apache-hive-3.1.2-bin.tar.gz \
 && wget --no-check-certificate https://httpd-mirror.sergal.org/apache/flume/1.9.0/apache-flume-1.9.0-bin.tar.gz \
+&& wget --no-check-certificate https://hpdinstalldocker.s3.amazonaws.com/zookeeper/apache-zookeeper-3.7.0-bin.tar.gz \
+&& wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash \
 && tar -xvf jdk-8u202-linux-x64.tar.gz && tar -xvf sqoop-1.4.7.bin__hadoop-2.6.0.tar.gz && tar -xvf apache-flume-1.9.0-bin.tar.gz \
 && tar -xvf apache-hive-3.1.2-bin.tar.gz && tar -xvf hadoop-3.3.1.tar.gz \
+&& tar -xvf apache-zookeeper-3.7.0-bin.tar.gz && rm -rf apache-zookeeper-3.7.0-bin.tar && mv apache-zookeeper-3.7.0-bin/ zookeeper \
 && rm -rf jdk-8u202-linux-x64.tar.gz && rm -rf sqoop-1.4.7.bin__hadoop-2.6.0.tar.gz \
 && rm -rf hadoop-3.3.1.tar.gz && rm -rf apache-hive-3.1.2-bin.tar.gz && rm -rf apache-flume-1.9.0-bin.tar.gz \
 && mv jdk1.8.0_202/ jdk && mv sqoop-1.4.7.bin__hadoop-2.6.0/ sqoop && mv hadoop-3.3.1/ hadoop \
@@ -39,6 +42,8 @@ RUN yum install net-tools -y \
 && echo -e 'export PATH=$PATH:$JAVA_HOME/bin:$JRE_HOME/bin:$HADOOP_HOME/bin' >> /etc/bashrc \
 && echo -e 'export HIVE_HOME=/opt/hive\nexport PATH=$PATH:/opt/hive/bin' >> /etc/bashrc\
 && echo -e 'export FLUME_HOME=/opt/flume\nexport PATH=$PATH:$FLUME_HOME/bin' >> /etc/bashrc \
+&& echo -e 'export ZOOKEEPER_HOME=/opt/zookeeper\nexport PATH=$PATH:$ZOOKEEPER_HOME/bin' >> /etc/bashrc  \
+&& echo -e 'export NVM_DIR="$HOME/.nvm"\n[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm\n[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion' >> /etc/bashrc  \
 && rm -f /run/nologin \
 && source /etc/bashrc
 VOLUME [ "/sys/fs/cgroup" ]

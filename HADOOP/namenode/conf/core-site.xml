@@ -18,19 +18,17 @@
 
 <configuration>
     <property>
-      <name>dfs.replication</name>
-      <value>3</value>
+        <name>fs.defaultFS</name>
+        <value>hdfs://ha-cluster</value>
     </property>
+
     <property>
-      <name>dfs.namenode.name.dir</name>
-      <value>/opt/hadoop/dfs/namespace_logs</value>
+        <name>dfs.journalnode.edits.dir</name>
+        <value>/home/hadoop/HA/data/jn</value>
     </property>
+
     <property>
-      <name>dfs.datanode.data.dir</name>
-      <value>/opt/hadoop/dfs/data</value>
-    </property>
-    <property>           
-      <name>dfs.webhdfs.enabled</name>           
-      <value>true</value>        
+        <name>ha.zookeeper.quorum</name>
+        <value>NODES:2181</value>
     </property>
 </configuration>
